@@ -9,6 +9,7 @@ const jwt = require("jsonwebtoken");
 const upload = require("./multer");
 const fs = require("fs");
 const path = require("path");
+const BASE_URL = process.env.VITE_BASE_URL
 
 const { authenticateToken } = require("./utilities");
 
@@ -123,7 +124,7 @@ app.post("/image-upload", upload.single("image"), async (req, res) => {
         .json({ error: true, message: "No image uploaded" });
     }
 
-    const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
+    const imageUrl = `${BASE_URL}/uploads/${req.file.filename}`;
 
     res.status(200).json({ imageUrl });
   } catch (error) {
@@ -237,7 +238,7 @@ app.put("/edit-story/:id", authenticateToken, async (req, res) => {
         .json({ error: true, message: "Travel story not found" });
     }
 
-    const placeholderImgUrl = `http://localhost:8000/assets/placeholder.png`;
+    const placeholderImgUrl = `${BASE_URL}/assets/placeholder.png`;
 
     travelStory.title = title;
     travelStory.story = story;
