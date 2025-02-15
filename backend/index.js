@@ -24,33 +24,41 @@ mongoose.connect(config.connectionString, {
   .catch(err => console.error('MongoDB connection error:', err));
   
   const app = express();
+
+  const allowedOrigins = [
+    "https://wander-tales-frontend.vercel.app",
+    "http://localhost:5173"
+  ];
   
-  // ✅ Proper CORS Configuration
   app.use(cors({
-    origin: ['https://wander-tales-frontend.vercel.app', 'http://localhost:5173'], // ✅ Remove trailing slash
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // ✅ Add OPTIONS
-    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'Access-Control-Allow-Origin'], // ✅ Correct headers
-    credentials: true // ✅ Allow credentials (if required)
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
   }));
   
   app.use(express.json());
   
-  // ✅ Handle Preflight Requests
-  app.options('*', cors()); // Allows CORS for preflight requests
-  
-  // ✅ Manually Set Headers to Ensure CORS
+  // ✅ Ensure CORS Headers for Every Request
   app.use((req, res, next) => {
-    res.header('Access-Control-Allow-Origin', req.headers.origin); // Dynamically set origin
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept');
-    res.header('Access-Control-Allow-Credentials', 'true');
+    res.header("Access-Control-Allow-Origin", req.headers.origin || "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    res.header("Access-Control-Allow-Credentials", "true");
     
-    if (req.method === 'OPTIONS') {
-      return res.status(200).end(); // Stop execution for preflight requests
+    if (req.method === "OPTIONS") {
+      return res.sendStatus(200);
     }
     
     next();
   });
+  
   
 
 // Create Account
