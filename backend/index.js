@@ -9,8 +9,8 @@ const jwt = require("jsonwebtoken");
 const upload = require("./multer");
 const fs = require("fs");
 const path = require("path");
-const BASE_URL = process.env.VITE_BASE_URL
-const MONGO_URI = process.env.MONGO_URI
+const BASE_URL = process.env.VITE_BASE_URL || 'http://localhost:8000'
+const MONGO_URI = process.env.MONGODB_URI
 
 const { authenticateToken } = require("./utilities");
 
@@ -20,11 +20,15 @@ const TravelStory = require("./models/travelStory.model");
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
-})
+}).then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: "*" }));
+app.use(cors({
+  origin: ['http://localhost:5173', process.env.FRONTEND_URL],
+  credentials: true
+}));
 
 // Create Account
 app.post("/create-account", async (req, res) => {
@@ -368,5 +372,10 @@ app.get("/travel-stories/filter", authenticateToken, async (req, res) => {
   }
 });
 
-app.listen(8000);
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(8000, () => {
+      console.log('Server is running on port 8000');
+  });
+}
+
 module.exports = app;
