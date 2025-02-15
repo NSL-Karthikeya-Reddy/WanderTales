@@ -9,17 +9,26 @@ const jwt = require("jsonwebtoken");
 const upload = require("./multer");
 const fs = require("fs");
 const path = require("path");
-ACCESS_TOKEN_SECRET="1f775dedc439323121b94836b9cb691f97793bb86a5c8d73030e158e57e68743886caef772ed3254945fd92d11fb218fa63df3cc753d06210c092daa1acb8286"
+const BASE_URL = process.env.VITE_BASE_URL || 'http://localhost:8000'
+const MONGO_URI = process.env.MONGODB_URI
+
 const { authenticateToken } = require("./utilities");
 
 const User = require("./models/user.model");
 const TravelStory = require("./models/travelStory.model");
 
-mongoose.connect("mongodb+srv://karthikeyareddy2nd:nBJld47MwupXvCMM@cluster0.i4k8j.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+}).then(() => console.log('Connected to MongoDB'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 const app = express();
 app.use(express.json());
-app.use(cors({ origin: "*" }));
+app.use(cors({
+  origin: ['http://localhost:5173', process.env.FRONTEND_URL],
+  credentials: true
+}));
 
 // Create Account
 app.post("/create-account", async (req, res) => {
@@ -50,7 +59,7 @@ app.post("/create-account", async (req, res) => {
 
   const accessToken = jwt.sign(
     { userId: user._id },
-    ACCESS_TOKEN_SECRET,
+    process.env.ACCESS_TOKEN_SECRET,
     {
       expiresIn: "72h",
     }
@@ -84,7 +93,7 @@ app.post("/login", async (req, res) => {
 
   const accessToken = jwt.sign(
     { userId: user._id },
-    ACCESS_TOKEN_SECRET,
+    process.env.ACCESS_TOKEN_SECRET,
     {
       expiresIn: "72h",
     }
@@ -123,7 +132,7 @@ app.post("/image-upload", upload.single("image"), async (req, res) => {
         .json({ error: true, message: "No image uploaded" });
     }
 
-    const imageUrl = `https://wander-tales-backend-flame.vercel.app/uploads/${req.file.filename}`;
+    const imageUrl = `${BASE_URL}/uploads/${req.file.filename}`;
 
     res.status(200).json({ imageUrl });
   } catch (error) {
@@ -237,7 +246,7 @@ app.put("/edit-story/:id", authenticateToken, async (req, res) => {
         .json({ error: true, message: "Travel story not found" });
     }
 
-    const placeholderImgUrl = `https://wander-tales-backend-flame.vercel.app/assets/placeholder.png`;
+    const placeholderImgUrl = `${BASE_URL}/assets/placeholder.png`;
 
     travelStory.title = title;
     travelStory.story = story;
@@ -363,5 +372,10 @@ app.get("/travel-stories/filter", authenticateToken, async (req, res) => {
   }
 });
 
-app.listen(8000);
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(8000, () => {
+      console.log('Server is running on port 8000');
+  });
+}
+
 module.exports = app;
