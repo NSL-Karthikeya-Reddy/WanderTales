@@ -10,13 +10,17 @@ const upload = require("./multer");
 const fs = require("fs");
 const path = require("path");
 const BASE_URL = process.env.VITE_BASE_URL
+const MONGO_URI = process.env.MONGO_URI
 
 const { authenticateToken } = require("./utilities");
 
 const User = require("./models/user.model");
 const TravelStory = require("./models/travelStory.model");
 
-mongoose.connect(config.connectionString);
+mongoose.connect(MONGO_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
 
 const app = express();
 app.use(express.json());
