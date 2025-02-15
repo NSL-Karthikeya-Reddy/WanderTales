@@ -23,10 +23,11 @@ mongoose.connect(config.connectionString, {
 }).then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
   
+  app.use(cors({ origin: "*" }));
   app.use(cors({
-    origin: ['https://wander-tales-frontend.vercel.app', 'http://localhost:5173'],
-    methods: 'GET,POST,PUT,DELETE',
-    allowedHeaders: 'Content-Type,Authorization, Access-Control-Allow-Origin',
+      origin: ['https://wander-tales-frontend.vercel.app', 'http://localhost:5173/'],
+      methods: 'GET,POST,PUT,DELETE',
+      allowedHeaders: 'Content-Type,Authorization, Access-Control-Allow-Origin'
   }));
 
 // Login
