@@ -17,7 +17,7 @@ const { authenticateToken } = require("./utilities");
 const User = require("./models/user.model");
 const TravelStory = require("./models/travelStory.model");
 
-mongoose.connect("mongodb+srv://karthikeyareddy2nd:nBJld47MwupXvCMM@cluster0.i4k8j.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
+mongoose.connect(config.connectionString, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log('Connected to MongoDB'))
@@ -26,7 +26,7 @@ mongoose.connect("mongodb+srv://karthikeyareddy2nd:nBJld47MwupXvCMM@cluster0.i4k
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: 'https://wander-tales-frontend.vercel.app',
+  origin: ['https://wander-tales-frontend.vercel.app', 'http://localhost:5173/'],
   methods: 'GET,POST,PUT,DELETE',
   allowedHeaders: 'Content-Type,Authorization'
 }));
