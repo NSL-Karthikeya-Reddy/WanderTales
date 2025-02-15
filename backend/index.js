@@ -9,26 +9,17 @@ const jwt = require("jsonwebtoken");
 const upload = require("./multer");
 const fs = require("fs");
 const path = require("path");
-const BASE_URL = process.env.VITE_BASE_URL || 'http://localhost:8000'
-const MONGO_URI = process.env.MONGODB_URI
-
+ACCESS_TOKEN_SECRET="1f775dedc439323121b94836b9cb691f97793bb86a5c8d73030e158e57e68743886caef772ed3254945fd92d11fb218fa63df3cc753d06210c092daa1acb8286"
 const { authenticateToken } = require("./utilities");
 
 const User = require("./models/user.model");
 const TravelStory = require("./models/travelStory.model");
 
-mongoose.connect(MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
+mongoose.connect("mongodb+srv://karthikeyareddy2nd:nBJld47MwupXvCMM@cluster0.i4k8j.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0");
 
 const app = express();
 app.use(express.json());
-app.use(cors({
-  origin: ['http://localhost:5173', process.env.FRONTEND_URL],
-  credentials: true
-}));
+app.use(cors({ origin: "*" }));
 
 // Create Account
 app.post("/create-account", async (req, res) => {
@@ -59,7 +50,7 @@ app.post("/create-account", async (req, res) => {
 
   const accessToken = jwt.sign(
     { userId: user._id },
-    process.env.ACCESS_TOKEN_SECRET,
+    ACCESS_TOKEN_SECRET,
     {
       expiresIn: "72h",
     }
@@ -93,7 +84,7 @@ app.post("/login", async (req, res) => {
 
   const accessToken = jwt.sign(
     { userId: user._id },
-    process.env.ACCESS_TOKEN_SECRET,
+    ACCESS_TOKEN_SECRET,
     {
       expiresIn: "72h",
     }
@@ -132,7 +123,7 @@ app.post("/image-upload", upload.single("image"), async (req, res) => {
         .json({ error: true, message: "No image uploaded" });
     }
 
-    const imageUrl = `${BASE_URL}/uploads/${req.file.filename}`;
+    const imageUrl = `http://localhost:8000/uploads/${req.file.filename}`;
 
     res.status(200).json({ imageUrl });
   } catch (error) {
@@ -246,7 +237,7 @@ app.put("/edit-story/:id", authenticateToken, async (req, res) => {
         .json({ error: true, message: "Travel story not found" });
     }
 
-    const placeholderImgUrl = `${BASE_URL}/assets/placeholder.png`;
+    const placeholderImgUrl = `http://localhost:8000/assets/placeholder.png`;
 
     travelStory.title = title;
     travelStory.story = story;
@@ -372,10 +363,5 @@ app.get("/travel-stories/filter", authenticateToken, async (req, res) => {
   }
 });
 
-if (process.env.NODE_ENV !== 'production') {
-  app.listen(8000, () => {
-      console.log('Server is running on port 8000');
-  });
-}
-
+app.listen(8000);
 module.exports = app;
