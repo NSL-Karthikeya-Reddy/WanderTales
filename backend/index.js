@@ -39,8 +39,7 @@ mongoose.connect(config.connectionString, {
       }
     },
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin"],
-    credentials: true
+    allowedHeaders: ["Content-Type", "Authorization", "Access-Control-Allow-Origin","Access-Control-Allow-Headers"],
   }));
   
   app.use(express.json());
