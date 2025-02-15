@@ -4,7 +4,7 @@ const config = require("./config.json");
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
 const express = require("express");
-const cors = require("cors");
+const cors = require('cors');
 const jwt = require("jsonwebtoken");
 const upload = require("./multer");
 const fs = require("fs");
@@ -26,8 +26,9 @@ mongoose.connect(MONGO_URI, {
 const app = express();
 app.use(express.json());
 app.use(cors({
-  origin: ['http://localhost:5173', process.env.FRONTEND_URL],
-  credentials: true
+  origin: 'https://wander-tales-frontend.vercel.app',
+  methods: 'GET,POST,PUT,DELETE',
+  allowedHeaders: 'Content-Type,Authorization'
 }));
 
 // Create Account
