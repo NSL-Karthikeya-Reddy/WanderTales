@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(cors({
   origin: ['https://wander-tales-frontend.vercel.app', 'http://localhost:5173/'],
   methods: 'GET,POST,PUT,DELETE',
-  allowedHeaders: 'Content-Type,Authorization'
+  allowedHeaders: 'Content-Type,Authorization, Access-Control-Allow-Origin',
 }));
 
 // Create Account
