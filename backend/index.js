@@ -24,70 +24,10 @@ mongoose.connect(config.connectionString, {
   .catch(err => console.error('MongoDB connection error:', err));
   
   app.use(cors({
-    origin: "*",  // ✅ Allow all origins
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-    credentials: true
+    origin: ['https://wander-tales-frontend.vercel.app', 'http://localhost:5173/'],
+    methods: 'GET,POST,PUT,DELETE',
+    allowedHeaders: 'Content-Type,Authorization, Access-Control-Allow-Origin',
   }));
-  
-  app.use(express.json());
-  
-  // ✅ Ensure CORS Headers for Every Request
-  app.use((req, res, next) => {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
-    res.header("Access-Control-Allow-Credentials", "true");
-    
-    if (req.method === "OPTIONS") {
-      return res.sendStatus(200);
-    }
-    
-    next();
-  });
-  
-// Create Account
-app.post("/create-account", async (req, res) => {
-  const { fullName, email, password } = req.body;
-
-  if (!fullName || !email || !password) {
-    return res
-      .status(400)
-      .json({ error: true, message: "All fields are required" });
-  }
-
-  const isUser = await User.findOne({ email });
-  if (isUser) {
-    return res
-      .status(400)
-      .json({ error: true, message: "User already exists" });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  const user = new User({
-    fullName,
-    email,
-    password: hashedPassword,
-  });
-
-  await user.save();
-
-  const accessToken = jwt.sign(
-    { userId: user._id },
-    process.env.ACCESS_TOKEN_SECRET,
-    {
-      expiresIn: "72h",
-    }
-  );
-
-  return res.status(201).json({
-    error: false,
-    user: { fullName: user.fullName, email: user.email },
-    accessToken,
-    message: "Registration Successful",
-  });
-});
 
 // Login
 app.post("/login", async (req, res) => {
