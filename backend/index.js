@@ -9,231 +9,183 @@ const jwt = require("jsonwebtoken");
 const upload = require("./multer");
 const fs = require("fs");
 const path = require("path");
-const BASE_URL = process.env.VITE_BASE_URL;
-const MONGO_URI = process.env.MONGO_URI;
+const BASE_URL = process.env.VITE_BASE_URL
+const MONGO_URI = process.env.MONGO_URI
 
 const { authenticateToken } = require("./utilities");
+
 const User = require("./models/user.model");
 const TravelStory = require("./models/travelStory.model");
 
-// MongoDB Connection with error handling
 mongoose.connect(MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('Connected to MongoDB'))
-.catch((err) => console.error('MongoDB connection error:', err));
 
 const app = express();
-
-// Middleware
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-
-// CORS Configuration
-const allowedOrigins = [
-  'https://wander-tales-seven.vercel.app',
-  'http://localhost:5173',
-  'http://localhost:3000'
-];
-
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
-
-// Additional headers middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-  }
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  
-  // Handle OPTIONS method
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-  next();
-});
-
-// Health check endpoint
-app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', message: 'Server is running' });
-});
+app.use(cors({ origin: "*" }));
 
 // Create Account
 app.post("/create-account", async (req, res) => {
-  try {
-    const { fullName, email, password } = req.body;
+  const { fullName, email, password } = req.body;
 
-    if (!fullName || !email || !password) {
-      return res
-        .status(400)
-        .json({ error: true, message: "All fields are required" });
-    }
-
-    const isUser = await User.findOne({ email });
-    if (isUser) {
-      return res
-        .status(400)
-        .json({ error: true, message: "User already exists" });
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = new User({
-      fullName,
-      email,
-      password: hashedPassword,
-    });
-
-    await user.save();
-
-    const accessToken = jwt.sign(
-      { userId: user._id },
-      process.env.ACCESS_TOKEN_SECRET,
-      {
-        expiresIn: "72h",
-      }
-    );
-
-    return res.status(201).json({
-      error: false,
-      user: { fullName: user.fullName, email: user.email },
-      accessToken,
-      message: "Registration Successful",
-    });
-  } catch (error) {
-    console.error('Registration error:', error);
-    return res.status(500).json({ error: true, message: "Server error during registration" });
+  if (!fullName || !email || !password) {
+    return res
+      .status(400)
+      .json({ error: true, message: "All fields are required" });
   }
+
+  const isUser = await User.findOne({ email });
+  if (isUser) {
+    return res
+      .status(400)
+      .json({ error: true, message: "User already exists" });
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = new User({
+    fullName,
+    email,
+    password: hashedPassword,
+  });
+
+  await user.save();
+
+  const accessToken = jwt.sign(
+    { userId: user._id },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: "72h",
+    }
+  );
+
+  return res.status(201).json({
+    error: false,
+    user: { fullName: user.fullName, email: user.email },
+    accessToken,
+    message: "Registration Successful",
+  });
 });
 
 // Login
 app.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: true, message: "Email and Password are required" });
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({ error: true, message: "User not found" });
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(400).json({ error: true, message: "Invalid Credentials" });
-    }
-
-    const accessToken = jwt.sign(
-      { userId: user._id },
-      process.env.ACCESS_TOKEN_SECRET,
-      {
-        expiresIn: "72h",
-      }
-    );
-
-    return res.json({
-      error: false,
-      message: "Login Successful",
-      user: { fullName: user.fullName, email: user.email },
-      accessToken,
-    });
-  } catch (error) {
-    console.error('Login error:', error);
-    return res.status(500).json({ error: true, message: "Server error during login" });
+  if (!email || !password) {
+    return res.status(400).json({ message: "Email and Password are required" });
   }
+
+  const user = await User.findOne({ email });
+  if (!user) {
+    return res.status(400).json({ message: "User not found" });
+  }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    return res.status(400).json({ message: "Invalid Credentials" });
+  }
+
+  const accessToken = jwt.sign(
+    { userId: user._id },
+    process.env.ACCESS_TOKEN_SECRET,
+    {
+      expiresIn: "72h",
+    }
+  );
+
+  return res.json({
+    error: false,
+    message: "Login Successful",
+    user: { fullName: user.fullName, email: user.email },
+    accessToken,
+  });
 });
 
 // Get User
 app.get("/get-user", authenticateToken, async (req, res) => {
-  try {
-    const { userId } = req.user;
+  const { userId } = req.user;
 
-    const user = await User.findOne({ _id: userId });
-    if (!user) {
-      return res.status(401).json({ error: true, message: "User not found" });
-    }
+  const isUser = await User.findOne({ _id: userId });
 
-    return res.json({
-      user: { fullName: user.fullName, email: user.email },
-      message: "User retrieved successfully",
-    });
-  } catch (error) {
-    console.error('Get user error:', error);
-    return res.status(500).json({ error: true, message: "Server error while fetching user" });
+  if (!isUser) {
+    return res.sendStatus(401);
   }
+
+  return res.json({
+    user: isUser,
+    message: "",
+  });
 });
 
-// Image Upload
+// Route to handle image upload
 app.post("/image-upload", upload.single("image"), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: true, message: "No image uploaded" });
+      return res
+        .status(400)
+        .json({ error: true, message: "No image uploaded" });
     }
 
     const imageUrl = `${BASE_URL}/uploads/${req.file.filename}`;
+
     res.status(200).json({ imageUrl });
   } catch (error) {
-    console.error('Image upload error:', error);
-    res.status(500).json({ error: true, message: "Server error during image upload" });
+    res.status(500).json({ error: true, message: error.message });
   }
 });
 
-// Delete Image
+// Delete an image from uploads folder
 app.delete("/delete-image", async (req, res) => {
+  const { imageUrl } = req.query;
+
+  if (!imageUrl) {
+    return res
+      .status(400)
+      .json({ error: true, message: "imageUrl parameter is required" });
+  }
+
   try {
-    const { imageUrl } = req.query;
-
-    if (!imageUrl) {
-      return res.status(400).json({ error: true, message: "imageUrl parameter is required" });
-    }
-
+    // Extract the filename from the imageUrl
     const filename = path.basename(imageUrl);
+
+    // Define the file path
     const filePath = path.join(__dirname, "uploads", filename);
 
+    // Check if the file exists
     if (fs.existsSync(filePath)) {
+      // Delete the file from the uploads folder
       fs.unlinkSync(filePath);
       res.status(200).json({ message: "Image deleted successfully" });
     } else {
-      res.status(404).json({ error: true, message: "Image not found" });
+      res.status(200).json({ error: true, message: "Image not found" });
     }
   } catch (error) {
-    console.error('Delete image error:', error);
-    res.status(500).json({ error: true, message: "Server error while deleting image" });
+    res.status(500).json({ error: true, message: error.message });
   }
 });
 
-// Static Files
+// Serve static files from the uploads and assets directory
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 
 // Add Travel Story
 app.post("/add-travel-story", authenticateToken, async (req, res) => {
+  const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
+  const { userId } = req.user;
+
+  // Validate required fields
+  if (!title || !story || !visitedLocation || !imageUrl || !visitedDate) {
+    return res
+      .status(400)
+      .json({ error: true, message: "All fields are required" });
+  }
+
+  // Convert visitedDate from milliseconds to Date object
+  const parsedVisitedDate = new Date(parseInt(visitedDate));
+
   try {
-    const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
-    const { userId } = req.user;
-
-    if (!title || !story || !visitedLocation || !imageUrl || !visitedDate) {
-      return res.status(400).json({ error: true, message: "All fields are required" });
-    }
-
-    const parsedVisitedDate = new Date(parseInt(visitedDate));
-    
     const travelStory = new TravelStory({
       title,
       story,
@@ -246,39 +198,48 @@ app.post("/add-travel-story", authenticateToken, async (req, res) => {
     await travelStory.save();
     res.status(201).json({ story: travelStory, message: "Added Successfully" });
   } catch (error) {
-    console.error('Add story error:', error);
-    res.status(500).json({ error: true, message: "Server error while adding story" });
+    res.status(400).json({ error: true, message: error.message });
   }
 });
 
 // Get All Travel Stories
 app.get("/get-all-stories", authenticateToken, async (req, res) => {
+  const { userId } = req.user;
+
   try {
-    const { userId } = req.user;
-    const travelStories = await TravelStory.find({ userId }).sort({ isFavourite: -1 });
+    const travelStories = await TravelStory.find({ userId: userId }).sort({
+      isFavourite: -1,
+    });
     res.status(200).json({ stories: travelStories });
   } catch (error) {
-    console.error('Get stories error:', error);
-    res.status(500).json({ error: true, message: "Server error while fetching stories" });
+    res.status(500).json({ error: true, message: error.message });
   }
 });
 
 // Edit Travel Story
 app.put("/edit-story/:id", authenticateToken, async (req, res) => {
+  const { id } = req.params;
+  const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
+  const { userId } = req.user;
+
+  // Validate required fields
+  if (!title || !story || !visitedLocation || !visitedDate) {
+    return res
+      .status(400)
+      .json({ error: true, message: "All fields are required" });
+  }
+
+  // Convert visitedDate from milliseconds to Date object
+  const parsedVisitedDate = new Date(parseInt(visitedDate));
+
   try {
-    const { id } = req.params;
-    const { title, story, visitedLocation, imageUrl, visitedDate } = req.body;
-    const { userId } = req.user;
-
-    if (!title || !story || !visitedLocation || !visitedDate) {
-      return res.status(400).json({ error: true, message: "All fields are required" });
-    }
-
-    const parsedVisitedDate = new Date(parseInt(visitedDate));
-    const travelStory = await TravelStory.findOne({ _id: id, userId });
+    // Find the travel story by ID and ensure it belongs to the authenticated user
+    const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
 
     if (!travelStory) {
-      return res.status(404).json({ error: true, message: "Travel story not found" });
+      return res
+        .status(404)
+        .json({ error: true, message: "Travel story not found" });
     }
 
     const placeholderImgUrl = `${BASE_URL}/assets/placeholder.png`;
@@ -292,75 +253,86 @@ app.put("/edit-story/:id", authenticateToken, async (req, res) => {
     await travelStory.save();
     res.status(200).json({ story: travelStory, message: "Update Successful" });
   } catch (error) {
-    console.error('Edit story error:', error);
-    res.status(500).json({ error: true, message: "Server error while editing story" });
+    res.status(500).json({ error: true, message: error.message });
   }
 });
 
-// Delete Travel Story
+// Delete a travel story
 app.delete("/delete-story/:id", authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { userId } = req.user;
+  const { id } = req.params;
+  const { userId } = req.user;
 
-    const travelStory = await TravelStory.findOne({ _id: id, userId });
+  try {
+    // Find the travel story by ID and ensure it belongs to the authenticated user
+    const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
 
     if (!travelStory) {
-      return res.status(404).json({ error: true, message: "Travel story not found" });
+      return res
+        .status(404)
+        .json({ error: true, message: "Travel story not found" });
     }
 
-    await TravelStory.deleteOne({ _id: id, userId });
+    // Delete the travel story from the database
+    await travelStory.deleteOne({ _id: id, userId: userId });
 
+    // Extract the filename from the imageUrl
     const imageUrl = travelStory.imageUrl;
     const filename = path.basename(imageUrl);
+
+    // Define the file path
     const filePath = path.join(__dirname, "uploads", filename);
 
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
+    // Delete the image file from the uploads folder
+    fs.unlink(filePath, (err) => {
+      if (err) {
+        console.error("Failed to delete image file:", err);
+        // Optionally, you could still respond with a success status here
+        // if you don't want to treat this as a critical error.
+      }
+    });
 
     res.status(200).json({ message: "Travel story deleted successfully" });
   } catch (error) {
-    console.error('Delete story error:', error);
-    res.status(500).json({ error: true, message: "Server error while deleting story" });
+    res.status(500).json({ error: true, message: error.message });
   }
 });
 
-// Update Favorite Status
+// Update isFavourite
 app.put("/update-is-favourite/:id", authenticateToken, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { isFavourite } = req.body;
-    const { userId } = req.user;
+  const { id } = req.params;
+  const { isFavourite } = req.body;
+  const { userId } = req.user;
 
-    const travelStory = await TravelStory.findOne({ _id: id, userId });
+  try {
+    const travelStory = await TravelStory.findOne({ _id: id, userId: userId });
 
     if (!travelStory) {
-      return res.status(404).json({ error: true, message: "Travel story not found" });
+      return res
+        .status(404)
+        .json({ error: true, message: "Travel story not found" });
     }
 
     travelStory.isFavourite = isFavourite;
+
     await travelStory.save();
-    
     res.status(200).json({ story: travelStory, message: "Update Successful" });
   } catch (error) {
-    console.error('Update favorite error:', error);
-    res.status(500).json({ error: true, message: "Server error while updating favorite status" });
+    res.status(500).json({ error: true, message: error.message });
   }
 });
 
-// Search Travel Stories
+// Search travel stories
 app.get("/search", authenticateToken, async (req, res) => {
+  const { query } = req.query;
+  const { userId } = req.user;
+
+  if (!query) {
+    return res.status(404).json({ error: true, message: "query is required" });
+  }
+
   try {
-    const { query } = req.query;
-    const { userId } = req.user;
-
-    if (!query) {
-      return res.status(400).json({ error: true, message: "Query parameter is required" });
-    }
-
     const searchResults = await TravelStory.find({
-      userId,
+      userId: userId,
       $or: [
         { title: { $regex: query, $options: "i" } },
         { story: { $regex: query, $options: "i" } },
@@ -370,46 +342,31 @@ app.get("/search", authenticateToken, async (req, res) => {
 
     res.status(200).json({ stories: searchResults });
   } catch (error) {
-    console.error('Search error:', error);
-    res.status(500).json({ error: true, message: "Server error while searching stories" });
+    res.status(500).json({ error: true, message: error.message });
   }
 });
 
-// Filter Travel Stories by Date
+// Filter travel stories by date range
 app.get("/travel-stories/filter", authenticateToken, async (req, res) => {
-  try {
-    const { startDate, endDate } = req.query;
-    const { userId } = req.user;
+  const { startDate, endDate } = req.query;
+  const { userId } = req.user;
 
+  try {
+    // Convert startDate and endDate from milliseconds to Date objects
     const start = new Date(parseInt(startDate));
     const end = new Date(parseInt(endDate));
 
+    // Find travel stories that belong to the authenticated user and fall within the date range
     const filteredStories = await TravelStory.find({
-      userId,
+      userId: userId,
       visitedDate: { $gte: start, $lte: end },
     }).sort({ isFavourite: -1 });
 
-    res.status(200).json({ stories: filteredStories });
+    res.status(200).json({stories: filteredStories});
   } catch (error) {
-    console.error('Filter error:', error);
-    res.status(500).json({ error: true, message: "Server error while filtering stories" });
+    res.status(500).json({ error: true, message: error.message });
   }
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: true, message: 'Something broke!' });
-});
-
-// Handle 404 routes
-app.use((req, res) => {
-  res.status(404).json({ error: true, message: 'Route not found' });
-});
-
-const PORT = process.env.PORT || 8000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
-
+app.listen(8000);
 module.exports = app;
