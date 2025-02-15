@@ -22,14 +22,36 @@ mongoose.connect(config.connectionString, {
   useUnifiedTopology: true,
 }).then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
-
-const app = express();
-app.use(express.json());
-app.use(cors({
-  origin: ['https://wander-tales-frontend.vercel.app', 'http://localhost:5173/'],
-  methods: 'GET,POST,PUT,DELETE',
-  allowedHeaders: 'Content-Type,Authorization, Access-Control-Allow-Origin',
-}));
+  
+  const app = express();
+  
+  // ✅ Proper CORS Configuration
+  app.use(cors({
+    origin: ['https://wander-tales-frontend.vercel.app', 'http://localhost:5173'], // ✅ Remove trailing slash
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // ✅ Add OPTIONS
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept', 'Access-Control-Allow-Origin'], // ✅ Correct headers
+    credentials: true // ✅ Allow credentials (if required)
+  }));
+  
+  app.use(express.json());
+  
+  // ✅ Handle Preflight Requests
+  app.options('*', cors()); // Allows CORS for preflight requests
+  
+  // ✅ Manually Set Headers to Ensure CORS
+  app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', req.headers.origin); // Dynamically set origin
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, Origin, X-Requested-With, Accept');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    if (req.method === 'OPTIONS') {
+      return res.status(200).end(); // Stop execution for preflight requests
+    }
+    
+    next();
+  });
+  
 
 // Create Account
 app.post("/create-account", async (req, res) => {
