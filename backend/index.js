@@ -17,7 +17,7 @@ const { authenticateToken } = require("./utilities");
 const User = require("./models/user.model");
 const TravelStory = require("./models/travelStory.model");
 
-mongoose.connect(MONGO_URI, {
+mongoose.connect("mongodb+srv://karthikeyareddy2nd:nBJld47MwupXvCMM@cluster0.i4k8j.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log('Connected to MongoDB'))
