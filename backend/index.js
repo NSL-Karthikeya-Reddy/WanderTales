@@ -22,7 +22,11 @@ mongoose.connect(config.connectionString, {
   useUnifiedTopology: true,
 }).then(() => console.log('Connected to MongoDB'))
   .catch(err => console.error('MongoDB connection error:', err));
-  
+
+  const app = express();
+  app.use(express.json());
+
+
   app.use(cors({ origin: "*" }));
   app.use(cors({
       origin: ['https://wander-tales-frontend.vercel.app', 'http://localhost:5173/'],
