@@ -11,5 +11,15 @@
         "src": "/(.*)",
         "dest": "index.html"
       }
+    ],
+    "headers": [
+      {
+        "source": "/(.*)",
+        "headers": [
+          { "key": "Access-Control-Allow-Origin", "value": "https://wander-tales-frontend.vercel.app" },
+          { "key": "Access-Control-Allow-Methods", "value": "GET,DELETE,PATCH,POST,PUT,OPTIONS" },
+          { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, X-Requested-With, Accept" }
+        ]
+      }
     ]
 }

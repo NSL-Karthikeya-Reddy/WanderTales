@@ -26,13 +26,20 @@ mongoose.connect(config.connectionString, {
   const app = express();
   app.use(express.json());
 
-
-  app.use(cors({ origin: "*" }));
   app.use(cors({
-      origin: ['https://wander-tales-frontend.vercel.app', 'http://localhost:5173/'],
-      methods: 'GET,POST,PUT,DELETE',
-      allowedHeaders: 'Content-Type,Authorization, Access-Control-Allow-Origin'
-  }));
+    origin: ['https://wander-tales-frontend.vercel.app', 'http://localhost:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Origin', 'X-Requested-With', 'Accept'],
+    credentials: true,
+    exposedHeaders: ['Access-Control-Allow-Origin']
+}));
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: true, message: 'Something broke!' });
+});
+
+app.options('*', cors()); // Enable pre-flight for all routes
 
 // Login
 app.post("/login", async (req, res) => {
