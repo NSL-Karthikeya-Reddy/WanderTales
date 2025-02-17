@@ -38,7 +38,7 @@ const IntroPage = () => {
                     <span className="text-4xl bounce-animation delay-0">✈️</span>
                     <span className="text-4xl bounce-animation delay-100">🗺️</span>
                     <span className="text-4xl bounce-animation delay-200">🌎</span>
-                    <span className="text-4xl bounce-animation delay-300">🧳.</span>
+                    <span className="text-4xl bounce-animation delay-300">🧳</span>
                     <span className="text-4xl bounce-animation delay-400">📸</span>
                 </div>
 

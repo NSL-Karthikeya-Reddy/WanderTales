@@ -15,6 +15,10 @@ import ViewTravelStory from "./ViewTravelStory";
 import EmptyCard from "../../components/Cards/EmptyCard";
 import FilterInfoTitle from "../../components/Cards/FilterInfoTitle";
 
+// Cloudinary Configuration
+const CLOUDINARY_CLOUD_NAME = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || "your-cloud-name";
+const CLOUDINARY_BASE_URL = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+
 // Keyframe animation styles
 const styles = `
   @keyframes fadeIn {
@@ -48,6 +52,37 @@ styleSheet.type = "text/css";
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
 
+// Cloudinary utility functions
+const generateCloudinaryUrl = (imageUrl, transformations = '') => {
+  if (!imageUrl) return null;
+  
+  // Handle already transformed Cloudinary URLs or non-Cloudinary URLs
+  if (!imageUrl.includes('cloudinary.com')) {
+    return imageUrl;
+  }
+  
+  // Extract public ID if it's a Cloudinary URL
+  let publicId;
+  try {
+    const urlObj = new URL(imageUrl);
+    const pathParts = urlObj.pathname.split('/');
+    const uploadIndex = pathParts.indexOf('upload');
+    
+    if (uploadIndex !== -1 && uploadIndex < pathParts.length - 1) {
+      publicId = pathParts.slice(uploadIndex + 1).join('/');
+    } else {
+      // Can't parse properly, return original URL
+      return imageUrl;
+    }
+  } catch (error) {
+    console.error('Error parsing Cloudinary URL:', error);
+    return imageUrl;
+  }
+  
+  // Build new URL with transformations
+  return `${CLOUDINARY_BASE_URL}/${transformations}/${publicId}`;
+};
+
 const Home = () => {
   const navigate = useNavigate();
   
@@ -67,6 +102,7 @@ const Home = () => {
     isShown: false,
     data: null,
   });
+  const [imageLoadErrors, setImageLoadErrors] = useState({});
 
   // API Calls
   const getUserInfo = async () => {
@@ -83,11 +119,24 @@ const Home = () => {
     }
   };
 
+  const processStoriesWithCloudinaryUrls = (stories) => {
+    return stories.map(story => ({
+      ...story,
+      // Create thumbnail version for cards
+      thumbnailUrl: story.imageUrl ? 
+        generateCloudinaryUrl(story.imageUrl, 'c_fill,g_auto,h_300,w_400,q_auto:good,f_auto') : null,
+      // Create full-size optimized version for viewing
+      optimizedImageUrl: story.imageUrl ?
+        generateCloudinaryUrl(story.imageUrl, 'q_auto:good,f_auto') : null
+    }));
+  };
+
   const getAllTravelStories = async () => {
     try {
       const response = await axiosInstance.get("/get-all-stories");
       if (response.data?.stories) {
-        setAllStories(response.data.stories);
+        const processedStories = processStoriesWithCloudinaryUrls(response.data.stories);
+        setAllStories(processedStories);
       }
     } catch (error) {
       toast.error("Failed to fetch stories");
@@ -138,13 +187,22 @@ const Home = () => {
     }
   };
 
+  // Handle image load errors
+  const handleImageError = (storyId) => {
+    setImageLoadErrors(prev => ({
+      ...prev,
+      [storyId]: true
+    }));
+  };
+
   // Search and Filter Functions
   const onSearchStory = async (query) => {
     try {
       const response = await axiosInstance.get("/search", { params: { query } });
       if (response.data?.stories) {
         setFilterType("search");
-        setAllStories(response.data.stories);
+        const processedStories = processStoriesWithCloudinaryUrls(response.data.stories);
+        setAllStories(processedStories);
       }
     } catch (error) {
       toast.error("Search failed");
@@ -169,7 +227,8 @@ const Home = () => {
 
         if (response.data?.stories) {
           setFilterType("date");
-          setAllStories(response.data.stories);
+          const processedStories = processStoriesWithCloudinaryUrls(response.data.stories);
+          setAllStories(processedStories);
           setShowCalendar(false);
         }
       }
@@ -276,20 +335,25 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Enhanced Stories Grid */}
+        {/* Enhanced Stories Grid with Cloudinary Optimized Images */}
         {allStories.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 animate-fadeIn">
             {allStories.map((item) => (
               <TravelStoryCard
                 key={item._id}
-                imgUrl={item.imageUrl}
+                imgUrl={imageLoadErrors[item._id] ? getEmptyCardImg('image') : (item.thumbnailUrl || item.imageUrl)}
                 title={item.title}
                 story={item.story}
                 date={item.visitedDate}
                 visitedLocation={item.visitedLocation}
                 isFavourite={item.isFavourite}
-                onClick={() => handleViewStory(item)}
+                onClick={() => handleViewStory({
+                  ...item,
+                  // Use optimized version for viewing
+                  imageUrl: item.optimizedImageUrl || item.imageUrl
+                })}
                 onFavouriteClick={() => updateIsFavourite(item)}
+                onImageError={() => handleImageError(item._id)}
               />
             ))}
           </div>
@@ -352,6 +416,7 @@ const Home = () => {
           storyInfo={openAddEditModal.data}
           onClose={() => setOpenAddEditModal({ isShown: false, type: "add", data: null })}
           getAllTravelStories={getAllTravelStories}
+          cloudName={CLOUDINARY_CLOUD_NAME}
         />
       </Modal>
 
@@ -383,6 +448,7 @@ const Home = () => {
             handleEdit(openViewModal.data);
           }}
           onDeleteClick={() => deleteTravelStory(openViewModal.data)}
+          onImageError={() => handleImageError(openViewModal.data?._id)}
         />
       </Modal>
 

@@ -1,11 +1,11 @@
 import React, { useState } from "react";
-import { MdAdd, MdDeleteOutline, MdUpdate, MdClose } from "react-icons/md";
+import { MdAdd, MdUpdate, MdClose } from "react-icons/md";
 import DateSelector from "../../components/Input/DateSelector";
 import ImageSelector from "../../components/Input/ImageSelector";
 import TagInput from "../../components/Input/TagInput";
 import axiosInstance from "../../utils/axiosInstance";
 import moment from "moment";
-import uploadImage from "../../utils/uploadImage";
+import { uploadImage, deleteImage } from "../../utils/uploadImage";
 import { toast } from "react-toastify";
 
 // Add custom styles to head
@@ -68,7 +68,12 @@ const AddEditTravelStory = ({
   getAllTravelStories,
 }) => {
   const [title, setTitle] = useState(storyInfo?.title || "");
-  const [storyImg, setStoryImg] = useState(storyInfo?.imageUrl || null);
+  const [storyImg, setStoryImg] = useState(
+    storyInfo ? {
+      url: storyInfo.imageUrl,
+      publicId: storyInfo.imagePublicId
+    } : null
+  );
   const [story, setStory] = useState(storyInfo?.story || "");
   const [visitedLocation, setVisitedLocation] = useState(
     storyInfo?.visitedLocation || []
@@ -83,17 +88,18 @@ const AddEditTravelStory = ({
   const addNewTravelStory = async () => {
     try {
       setIsSubmitting(true);
-      let imageUrl = "";
-
-      if (storyImg) {
-        const imgUploadRes = await uploadImage(storyImg);
-        imageUrl = imgUploadRes.imageUrl || "";
+      
+      // If there's a new image (File object), upload it
+      let imageData = storyImg;
+      if (storyImg instanceof File) {
+        imageData = await uploadImage(storyImg);
       }
 
       const response = await axiosInstance.post("/add-travel-story", {
         title,
         story,
-        imageUrl: imageUrl || "",
+        imageUrl: imageData?.url || "",
+        imagePublicId: imageData?.publicId || "",
         visitedLocation,
         visitedDate: visitedDate
           ? moment(visitedDate).valueOf()
@@ -111,6 +117,7 @@ const AddEditTravelStory = ({
       } else {
         setError("An unexpected error occurred. Please try again.");
       }
+      toast.error("Failed to add story");
     } finally {
       setIsSubmitting(false);
     }
@@ -121,23 +128,28 @@ const AddEditTravelStory = ({
     try {
       setIsSubmitting(true);
       const storyId = storyInfo._id;
-      let imageUrl = "";
+      
+      // Handle image changes
+      let imageData = storyImg;
+      if (storyImg instanceof File) {
+        // If there's an existing image, delete it first
+        if (storyInfo.imagePublicId) {
+          await deleteImage(storyInfo.imagePublicId);
+        }
+        // Upload the new image
+        imageData = await uploadImage(storyImg);
+      }
 
-      let postData = {
+      const postData = {
         title,
         story,
-        imageUrl: storyInfo.imageUrl || "",
+        imageUrl: imageData?.url || "",
+        imagePublicId: imageData?.publicId || "",
         visitedLocation,
         visitedDate: visitedDate
           ? moment(visitedDate).valueOf()
           : moment().valueOf(),
       };
-
-      if (typeof storyImg === "object") {
-        const imgUploadRes = await uploadImage(storyImg);
-        imageUrl = imgUploadRes?.imageUrl || "";
-        postData = { ...postData, imageUrl };
-      }
 
       const response = await axiosInstance.put(`/edit-story/${storyId}`, postData);
 
@@ -152,6 +164,7 @@ const AddEditTravelStory = ({
       } else {
         setError("An unexpected error occurred. Please try again.");
       }
+      toast.error("Failed to update story");
     } finally {
       setIsSubmitting(false);
     }
@@ -178,26 +191,14 @@ const AddEditTravelStory = ({
 
   const handleDeleteStoryImg = async () => {
     try {
-      const deleteImgRes = await axiosInstance.delete("/delete-image", {
-        params: { imageUrl: storyInfo.imageUrl },
-      });
-
-      if (deleteImgRes.data) {
-        const storyId = storyInfo._id;
-        const postData = {
-          title,
-          story,
-          visitedLocation,
-          visitedDate: moment().valueOf(),
-          imageUrl: "",
-        };
-
-        await axiosInstance.put(`/edit-story/${storyId}`, postData);
+      if (storyImg?.publicId) {
+        await deleteImage(storyImg.publicId);
         setStoryImg(null);
         toast.success("🗑 Image Deleted Successfully");
       }
     } catch (error) {
-      toast.error("Failed to delete Image");
+      console.error('Delete error:', error);
+      toast.error("Failed to delete image");
     }
   };
 

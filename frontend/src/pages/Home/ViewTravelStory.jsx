@@ -1,20 +1,39 @@
-import React from 'react';
-import { MdEdit, MdDelete, MdClose } from 'react-icons/md';
+import React, { useState, useEffect } from 'react';
+import { MdEdit, MdDelete, MdClose, MdErrorOutline } from 'react-icons/md';
 import moment from 'moment';
 
 const ViewTravelStory = ({ storyInfo, onClose, onEditClick, onDeleteClick }) => {
+  const [imageError, setImageError] = useState(false);
+  
+  useEffect(() => {
+    // Reset image error state when story changes
+    setImageError(false);
+  }, [storyInfo]);
+
   if (!storyInfo) return null;
 
   return (
     <div className="relative max-h-[90vh] bg-zinc-900/95 backdrop-blur-xl rounded-2xl border border-zinc-700/50 shadow-2xl shadow-black/20 overflow-hidden animate-fadeIn">
       {/* Hero Image Section */}
-      {storyInfo.imageUrl && (
+      {storyInfo.imageUrl && !imageError ? (
         <div className="relative h-72 w-full">
           <img 
             src={storyInfo.imageUrl} 
             alt={storyInfo.title}
             className="w-full h-full object-cover"
+            onError={() => setImageError(true)}
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
+        </div>
+      ) : imageError ? (
+        <div className="relative h-72 w-full bg-zinc-800 flex flex-col items-center justify-center">
+          <MdErrorOutline className="text-5xl text-yellow-500/70 mb-2" />
+          <p className="text-zinc-400 text-sm">Failed to load image</p>
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
+        </div>
+      ) : (
+        <div className="relative h-72 w-full bg-gradient-to-tr from-zinc-800 to-zinc-700 flex items-center justify-center">
+          <div className="text-5xl">🌍</div>
           <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
         </div>
       )}
