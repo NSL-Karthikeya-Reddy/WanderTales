@@ -16,8 +16,8 @@ import EmptyCard from "../../components/Cards/EmptyCard";
 import FilterInfoTitle from "../../components/Cards/FilterInfoTitle";
 
 // Cloudinary Configuration
-const CLOUDINARY_CLOUD_NAME = process.env.REACT_APP_CLOUDINARY_CLOUD_NAME || "your-cloud-name";
-const CLOUDINARY_BASE_URL = `https://res.cloudinary.com/${CLOUDINARY_CLOUD_NAME}/image/upload`;
+const CLOUDINARY_CLOUD_NAME = "dm3veyhds";
+const CLOUDINARY_BASE_URL = `https://res.cloudinary.com/${"dm3veyhds"}/image/upload`;
 
 // Keyframe animation styles
 const styles = `
