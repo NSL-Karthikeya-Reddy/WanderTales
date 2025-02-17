@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { MdAdd, MdUpdate, MdClose } from "react-icons/md";
 import DateSelector from "../../components/Input/DateSelector";
-import ImageSelector from "../../components/Input/ImageSelector";
 import TagInput from "../../components/Input/TagInput";
 import axiosInstance from "../../utils/axiosInstance";
 import moment from "moment";
-import { uploadImage, deleteImage } from "../../utils/uploadImage";
 import { toast } from "react-toastify";
 
-// Add custom styles to head
+// Keep the same custom styles for scrollbar and animations
 const styles = `
   /* Custom Scrollbar Styles */
   .custom-scrollbar::-webkit-scrollbar {
@@ -68,12 +66,6 @@ const AddEditTravelStory = ({
   getAllTravelStories,
 }) => {
   const [title, setTitle] = useState(storyInfo?.title || "");
-  const [storyImg, setStoryImg] = useState(
-    storyInfo ? {
-      url: storyInfo.imageUrl,
-      publicId: storyInfo.imagePublicId
-    } : null
-  );
   const [story, setStory] = useState(storyInfo?.story || "");
   const [visitedLocation, setVisitedLocation] = useState(
     storyInfo?.visitedLocation || []
@@ -89,17 +81,9 @@ const AddEditTravelStory = ({
     try {
       setIsSubmitting(true);
       
-      // If there's a new image (File object), upload it
-      let imageData = storyImg;
-      if (storyImg instanceof File) {
-        imageData = await uploadImage(storyImg);
-      }
-
       const response = await axiosInstance.post("/add-travel-story", {
         title,
         story,
-        imageUrl: imageData?.url || "",
-        imagePublicId: imageData?.publicId || "",
         visitedLocation,
         visitedDate: visitedDate
           ? moment(visitedDate).valueOf()
@@ -129,22 +113,9 @@ const AddEditTravelStory = ({
       setIsSubmitting(true);
       const storyId = storyInfo._id;
       
-      // Handle image changes
-      let imageData = storyImg;
-      if (storyImg instanceof File) {
-        // If there's an existing image, delete it first
-        if (storyInfo.imagePublicId) {
-          await deleteImage(storyInfo.imagePublicId);
-        }
-        // Upload the new image
-        imageData = await uploadImage(storyImg);
-      }
-
       const postData = {
         title,
         story,
-        imageUrl: imageData?.url || "",
-        imagePublicId: imageData?.publicId || "",
         visitedLocation,
         visitedDate: visitedDate
           ? moment(visitedDate).valueOf()
@@ -186,19 +157,6 @@ const AddEditTravelStory = ({
       updateTravelStory();
     } else {
       addNewTravelStory();
-    }
-  };
-
-  const handleDeleteStoryImg = async () => {
-    try {
-      if (storyImg?.publicId) {
-        await deleteImage(storyImg.publicId);
-        setStoryImg(null);
-        toast.success("🗑 Image Deleted Successfully");
-      }
-    } catch (error) {
-      console.error('Delete error:', error);
-      toast.error("Failed to delete image");
     }
   };
 
@@ -290,18 +248,6 @@ const AddEditTravelStory = ({
             <DateSelector date={visitedDate} setDate={setVisitedDate} />
           </div>
 
-          {/* Image Selector */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-zinc-400">
-              STORY IMAGE 🖼
-            </label>
-            <ImageSelector
-              image={storyImg}
-              setImage={setStoryImg}
-              handleDeleteImg={handleDeleteStoryImg}
-            />
-          </div>
-
           {/* Story Text Area */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-zinc-400">
@@ -313,7 +259,7 @@ const AddEditTravelStory = ({
                 focus:border-yellow-500/50 focus:bg-zinc-800/80 transition-all duration-300
                 custom-scrollbar"
               placeholder="Share your amazing journey ✈"
-              rows={10}
+              rows={12}
               value={story}
               onChange={({ target }) => setStory(target.value)}
             />

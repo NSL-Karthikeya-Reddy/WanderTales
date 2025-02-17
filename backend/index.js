@@ -6,7 +6,6 @@ const bcrypt = require("bcryptjs");
 const express = require("express");
 const cors = require('cors');
 const jwt = require("jsonwebtoken");
-const { upload, cloudinary } = require("./multer");
 const fs = require("fs");
 const path = require("path");
 const BASE_URL = process.env.VITE_BASE_URL || 'http://localhost:8000'
@@ -134,65 +133,15 @@ app.get("/get-user", authenticateToken, async (req, res) => {
   });
 });
 
-// Modified: Route to handle image upload
-app.post("/image-upload", upload.single("image"), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ error: true, message: "No image uploaded" });
-    }
-
-    // Convert buffer to base64
-    const fileStr = req.file.buffer.toString('base64');
-    const fileType = req.file.mimetype;
-
-    // Upload to cloudinary
-    const uploadResponse = await cloudinary.uploader.upload(
-      `data:${fileType};base64,${fileStr}`,
-      {
-        folder: 'travel_stories',
-        resource_type: 'auto',
-      }
-    );
-
-    res.status(200).json({ 
-      imageUrl: uploadResponse.secure_url,
-      imagePublicId: uploadResponse.public_id 
-    });
-  } catch (error) {
-    console.error('Upload error:', error);
-    res.status(500).json({ error: true, message: error.message });
-  }
-});
-
-
-// Modified: Delete an image
-app.delete("/delete-image", async (req, res) => {
-  const { imagePublicId } = req.query;
-
-  if (!imagePublicId) {
-    return res.status(400).json({ error: true, message: "imagePublicId parameter is required" });
-  }
-
-  try {
-    // Delete the image from Cloudinary
-    await cloudinary.uploader.destroy(imagePublicId);
-    res.status(200).json({ message: "Image deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ error: true, message: error.message });
-  }
-});
-
-
-// Serve static files from the uploads and assets directory
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Serve static files from the assets directory
 app.use("/assets", express.static(path.join(__dirname, "assets")));
 
-// Modified: Add Travel Story
+// Modified: Add Travel Story (without image)
 app.post("/add-travel-story", authenticateToken, async (req, res) => {
-  const { title, story, visitedLocation, imageUrl, imagePublicId, visitedDate } = req.body;
+  const { title, story, visitedLocation, visitedDate } = req.body;
   const { userId } = req.user;
 
-  if (!title || !story || !visitedLocation || !imageUrl || !visitedDate) {
+  if (!title || !story || !visitedLocation || !visitedDate) {
     return res.status(400).json({ error: true, message: "All fields are required" });
   }
 
@@ -204,8 +153,6 @@ app.post("/add-travel-story", authenticateToken, async (req, res) => {
       story,
       visitedLocation,
       userId,
-      imageUrl,
-      imagePublicId,
       visitedDate: parsedVisitedDate,
     });
 
@@ -230,10 +177,10 @@ app.get("/get-all-stories", authenticateToken, async (req, res) => {
   }
 });
 
-// Modified: Edit Travel Story
+// Modified: Edit Travel Story (without image)
 app.put("/edit-story/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
-  const { title, story, visitedLocation, imageUrl, imagePublicId, visitedDate } = req.body;
+  const { title, story, visitedLocation, visitedDate } = req.body;
   const { userId } = req.user;
 
   if (!title || !story || !visitedLocation || !visitedDate) {
@@ -249,18 +196,9 @@ app.put("/edit-story/:id", authenticateToken, async (req, res) => {
       return res.status(404).json({ error: true, message: "Travel story not found" });
     }
 
-    // If image is being changed, delete the old image from Cloudinary
-    if (imageUrl && imageUrl !== travelStory.imageUrl && travelStory.imagePublicId) {
-      await cloudinary.uploader.destroy(travelStory.imagePublicId);
-    }
-
     travelStory.title = title;
     travelStory.story = story;
     travelStory.visitedLocation = visitedLocation;
-    if (imageUrl) {
-      travelStory.imageUrl = imageUrl;
-      travelStory.imagePublicId = imagePublicId;
-    }
     travelStory.visitedDate = parsedVisitedDate;
 
     await travelStory.save();
@@ -270,7 +208,7 @@ app.put("/edit-story/:id", authenticateToken, async (req, res) => {
   }
 });
 
-// Modified: Delete a travel story
+// Modified: Delete a travel story (without image deletion)
 app.delete("/delete-story/:id", authenticateToken, async (req, res) => {
   const { id } = req.params;
   const { userId } = req.user;
@@ -280,11 +218,6 @@ app.delete("/delete-story/:id", authenticateToken, async (req, res) => {
 
     if (!travelStory) {
       return res.status(404).json({ error: true, message: "Travel story not found" });
-    }
-
-    // Delete the image from Cloudinary if it exists
-    if (travelStory.imagePublicId) {
-      await cloudinary.uploader.destroy(travelStory.imagePublicId);
     }
 
     // Delete the travel story from the database

@@ -28,22 +28,23 @@ const TagInput = ({ tags, setTags }) => {
   };
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       {tags.length > 0 && (
-        <div className="flex items-center gap-2 flex-wrap animate-fadeIn">
+        <div className="flex items-center gap-2.5 flex-wrap animate-fadeIn">
           {tags.map((tag, index) => (
             <span
               key={index}
               className="flex items-center gap-2 text-[15px] font-medium
                 bg-yellow-500/10 text-yellow-400
-                px-3.5 py-2 rounded-xl border border-yellow-500/20
-                group hover:bg-yellow-500/15 transition-all duration-300"
+                px-4 py-2.5 rounded-xl border border-yellow-500/20
+                group hover:bg-yellow-500/15 transition-all duration-300
+                shadow-sm shadow-yellow-500/5"
             >
               <HiOutlineLocationMarker className="text-lg" />
-              {tag} ✨
+              {tag}
               <button 
                 onClick={() => handleRemoveTag(tag)}
-                className="hover:bg-yellow-500/20 p-1 rounded-lg
+                className="hover:bg-yellow-500/20 p-1 rounded-lg ml-1
                   transition-all duration-300 hover:scale-110 active:scale-95"
               >
                 <MdClose className="text-base" />
@@ -69,7 +70,7 @@ const TagInput = ({ tags, setTags }) => {
             className="w-full text-[15px] font-medium bg-transparent 
               px-4 py-3.5 rounded-xl outline-none
               text-white/90 placeholder:text-zinc-400"
-            placeholder="Add Destination 🗺️"
+            placeholder="Enter destination name"
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
             onFocus={() => setIsFocused(true)}
@@ -78,7 +79,7 @@ const TagInput = ({ tags, setTags }) => {
         </div>
 
         <button
-          className="w-11 h-11 flex items-center justify-center rounded-xl
+          className="w-12 h-12 flex items-center justify-center rounded-xl
             bg-gradient-to-tr from-yellow-500 to-yellow-400 
             hover:from-yellow-400 hover:to-yellow-300
             transform hover:scale-110 transition-all duration-300 

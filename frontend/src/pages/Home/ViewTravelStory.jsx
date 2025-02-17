@@ -1,42 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { MdEdit, MdDelete, MdClose, MdErrorOutline } from 'react-icons/md';
+import React from 'react';
+import { MdEdit, MdDelete, MdClose } from 'react-icons/md';
 import moment from 'moment';
 
 const ViewTravelStory = ({ storyInfo, onClose, onEditClick, onDeleteClick }) => {
-  const [imageError, setImageError] = useState(false);
-  
-  useEffect(() => {
-    // Reset image error state when story changes
-    setImageError(false);
-  }, [storyInfo]);
-
   if (!storyInfo) return null;
 
   return (
     <div className="relative max-h-[90vh] bg-zinc-900/95 backdrop-blur-xl rounded-2xl border border-zinc-700/50 shadow-2xl shadow-black/20 overflow-hidden animate-fadeIn">
-      {/* Hero Image Section */}
-      {storyInfo.imageUrl && !imageError ? (
-        <div className="relative h-72 w-full">
-          <img 
-            src={storyInfo.imageUrl} 
-            alt={storyInfo.title}
-            className="w-full h-full object-cover"
-            onError={() => setImageError(true)}
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
+      {/* Header Section with Gradient */}
+      <div className="relative h-48 w-full bg-gradient-to-r from-zinc-800 via-yellow-500/10 to-zinc-800 p-6">
+        {/* Title with larger size and gradient text */}
+        <div className="h-full flex flex-col justify-between">
+          <h2 className="text-4xl font-bold text-white mb-4 
+            bg-gradient-to-r from-yellow-200 to-yellow-400 bg-clip-text text-transparent">
+            {storyInfo.title}
+          </h2>
+          
+          {/* Meta Information */}
+          <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-300">
+            <span className="flex items-center gap-2 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-lg
+              border border-white/10">
+              <span className="text-lg">📍</span> 
+              {Array.isArray(storyInfo.visitedLocation) 
+                ? storyInfo.visitedLocation.join(', ')
+                : storyInfo.visitedLocation}
+            </span>
+            <span className="flex items-center gap-2 bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-lg
+              border border-white/10">
+              <span className="text-lg">📅</span> 
+              {moment(storyInfo.visitedDate).format('MMMM DD, YYYY')}
+            </span>
+          </div>
         </div>
-      ) : imageError ? (
-        <div className="relative h-72 w-full bg-zinc-800 flex flex-col items-center justify-center">
-          <MdErrorOutline className="text-5xl text-yellow-500/70 mb-2" />
-          <p className="text-zinc-400 text-sm">Failed to load image</p>
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
-        </div>
-      ) : (
-        <div className="relative h-72 w-full bg-gradient-to-tr from-zinc-800 to-zinc-700 flex items-center justify-center">
-          <div className="text-5xl">🌍</div>
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
-        </div>
-      )}
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-zinc-900/50 to-transparent" />
+      </div>
 
       {/* Header Actions */}
       <div className="absolute top-4 right-4 flex items-center gap-3 z-10">
@@ -68,28 +67,7 @@ const ViewTravelStory = ({ storyInfo, onClose, onEditClick, onDeleteClick }) => 
       </div>
 
       {/* Content Section */}
-      <div className="p-6 max-h-[calc(90vh-288px)] overflow-y-auto custom-scrollbar">
-        {/* Title */}
-        <h2 className="text-3xl font-bold text-white mb-6 
-          bg-gradient-to-r from-yellow-200 to-yellow-400 bg-clip-text text-transparent">
-          {storyInfo.title}
-        </h2>
-        
-        {/* Meta Information */}
-        <div className="flex flex-wrap items-center gap-4 text-sm text-zinc-400 mb-8
-          border-b border-zinc-700/50 pb-6">
-          <span className="flex items-center gap-2 bg-zinc-800/50 px-3 py-1.5 rounded-lg">
-            <span className="text-lg">📍</span> 
-            {Array.isArray(storyInfo.visitedLocation) 
-              ? storyInfo.visitedLocation.join(', ')
-              : storyInfo.visitedLocation}
-          </span>
-          <span className="flex items-center gap-2 bg-zinc-800/50 px-3 py-1.5 rounded-lg">
-            <span className="text-lg">📅</span> 
-            {moment(storyInfo.visitedDate).format('MMMM DD, YYYY')}
-          </span>
-        </div>
-
+      <div className="p-6 max-h-[calc(90vh-192px)] overflow-y-auto custom-scrollbar">
         {/* Story Content */}
         <div className="prose prose-invert max-w-none">
           <p className="text-zinc-300 leading-relaxed whitespace-pre-wrap text-lg">
@@ -101,7 +79,7 @@ const ViewTravelStory = ({ storyInfo, onClose, onEditClick, onDeleteClick }) => 
   );
 };
 
-// Add custom scrollbar styles
+// Keep the same custom scrollbar and animation styles
 const styles = `
   .custom-scrollbar::-webkit-scrollbar {
     width: 8px;
