@@ -1,7 +1,5 @@
 # 🌍 WanderTales - Your Personal Travel Journal
 
-![WanderTales](https://api.placeholder.com/1200/630)
-
 > ✈️ Capture your adventures, one story at a time
 
 WanderTales is a personal travel journal application that lets you document travel experiences, memories, and stories with ease. Whether you're a globetrotter or weekend explorer, preserve your journeys with location tagging, date tracking, and favorite marking features.
@@ -33,12 +31,6 @@ Experience WanderTales now: [https://wander-tales-frontend.vercel.app/](https://
 - **🔍 Search and Filter**: Find stories by title, content, or location and filter by date range
 - **⭐ Favorites**: Mark your favorite travel stories for quick access
 - **📱 Responsive UI**: Clean, modern interface built with React and Tailwind CSS
-
-## 🖼️ Screenshots
-
-![Homepage](https://api.placeholder.com/800/450)
-![Add Story](https://api.placeholder.com/800/450)
-![Story Details](https://api.placeholder.com/800/450)
 
 ## 🚀 Installation
 
