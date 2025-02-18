@@ -136,10 +136,6 @@ Experience WanderTales now: [https://wander-tales-frontend.vercel.app/](https://
 ---
 
 <p align="center">
-  📸 Document your journey • 🌎 Explore your memories • 🏆 Cherish your adventures
+  📝 Document your journey • 🌎 Explore your memories • 🏆 Cherish your adventures
 </p>
 
-<p align="center">
-  <a href="https://github.com/yourusername/WanderTales/issues">Report Bug</a> •
-  <a href="https://github.com/yourusername/WanderTales/issues">Request Feature</a>
-</p>
