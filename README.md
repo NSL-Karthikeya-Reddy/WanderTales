@@ -1,9 +1,30 @@
 # 🌍 WanderTales - Your Personal Travel Journal
 
+![WanderTales](https://api.placeholder.com/1200/630)
+
 > ✈️ Capture your adventures, one story at a time
 
 WanderTales is a personal travel journal application that lets you document travel experiences, memories, and stories with ease. Whether you're a globetrotter or weekend explorer, preserve your journeys with location tagging, date tracking, and favorite marking features.
 
+## 🚀 Live Demo
+
+Experience WanderTales now: [https://wander-tales-frontend.vercel.app/](https://wander-tales-frontend.vercel.app/)
+
+## 📋 Table of Contents
+
+- [✨ Features](#features)
+- [🖼️ Screenshots](#screenshots)
+- [🚀 Installation](#installation)
+  - [📋 Prerequisites](#prerequisites)
+  - [⚙️ Backend Setup](#backend-setup)
+  - [🖥️ Frontend Setup](#frontend-setup)
+- [📝 Usage](#usage)
+- [🔌 API Endpoints](#api-endpoints)
+  - [🔐 Authentication](#authentication)
+  - [📖 Travel Stories](#travel-stories)
+  - [🔍 Search and Filter](#search-and-filter)
+- [🛠️ Technologies Used](#technologies-used)
+- [👥 Contributors](#contributors)
 
 ## ✨ Features
 
@@ -12,6 +33,12 @@ WanderTales is a personal travel journal application that lets you document trav
 - **🔍 Search and Filter**: Find stories by title, content, or location and filter by date range
 - **⭐ Favorites**: Mark your favorite travel stories for quick access
 - **📱 Responsive UI**: Clean, modern interface built with React and Tailwind CSS
+
+## 🖼️ Screenshots
+
+![Homepage](https://api.placeholder.com/800/450)
+![Add Story](https://api.placeholder.com/800/450)
+![Story Details](https://api.placeholder.com/800/450)
 
 ## 🚀 Installation
 
@@ -23,46 +50,46 @@ WanderTales is a personal travel journal application that lets you document trav
 
 ### ⚙️ Backend Setup
 
-1. Clone the repository:
+1. **Clone the repository:**
 ```bash
 git clone https://github.com/yourusername/WanderTales.git
 cd WanderTales/backend
 ```
 
-2. Install dependencies:
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-3. Create a `.env` file in the backend directory with these environment variables:
+3. **Create a `.env` file in the backend directory with these environment variables:**
 ```env
 ACCESS_TOKEN_SECRET=your_jwt_secret_key
 MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.xymor.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 ```
 
-4. Start the backend server:
+4. **Start the backend server:**
 ```bash
 npm start
 ```
 
 ### 🖥️ Frontend Setup
 
-1. Navigate to the frontend directory:
+1. **Navigate to the frontend directory:**
 ```bash
 cd ../frontend
 ```
 
-2. Install dependencies:
+2. **Install dependencies:**
 ```bash
 npm install
 ```
 
-3. Start the development server:
+3. **Start the development server:**
 ```bash
 npm run dev
 ```
 
-4. Open your browser and navigate to http://localhost:5173 (or the port specified by Vite)
+4. **Open your browser and navigate to http://localhost:5173** (or the port specified by Vite)
 
 ## 📝 Usage
 
@@ -99,6 +126,7 @@ npm run dev
 - 🍃 MongoDB (via MongoDB Atlas)
 - 🦋 Mongoose for database modeling
 - 🔑 JWT for authentication
+- 📁 Multer for image uploads
 - 🔒 bcrypt for password hashing
 
 ### Frontend
@@ -114,13 +142,15 @@ npm run dev
 - **N.S.L Karthikeya Reddy** - [GitHub](https://github.com/NSL-Karthikeya-Reddy)
 - **Datta Srivathsava Gollapinni** - [GitHub](https://github.com/dattu20038)
 
-## 🔗 Live Demo
+## 📄 Resources
 
-Experience WanderTales now: [https://wander-tales-frontend.vercel.app/](https://wander-tales-frontend.vercel.app/)
+- [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
+- [JWT Documentation](https://jwt.io/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [React Documentation](https://reactjs.org/)
 
 ---
 
 <p align="center">
   📝 Document your journey • 🌎 Explore your memories • 🏆 Cherish your adventures
 </p>
-
