@@ -4,21 +4,6 @@
 
 WanderTales is a personal travel journal application that lets you document travel experiences, memories, and stories with ease. Whether you're a globetrotter or weekend explorer, preserve your journeys with location tagging, date tracking, and favorite marking features.
 
-## 📋 Table of Contents
-
-- [✨ Features](#features)
-- [🚀 Installation](#installation)
-  - [📋 Prerequisites](#prerequisites)
-  - [⚙️ Backend Setup](#backend-setup)
-  - [🖥️ Frontend Setup](#frontend-setup)
-- [📝 Usage](#usage)
-- [🔌 API Endpoints](#api-endpoints)
-  - [🔐 Authentication](#authentication)
-  - [📖 Travel Stories](#travel-stories)
-  - [🔍 Search and Filter](#search-and-filter)
-- [🛠️ Technologies Used](#technologies-used)
-- [👥 Contributors](#contributors)
-- [🔗 Live Demo](#live-demo)
 
 ## ✨ Features
 
