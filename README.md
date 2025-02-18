@@ -1,7 +1,5 @@
 # 🌍 WanderTales - Your Personal Travel Journal
 
-![WanderTales]
-
 > ✈️ Capture your adventures, one story at a time
 
 WanderTales is a personal travel journal application that lets you document travel experiences, memories, and stories with ease. Whether you're a globetrotter or weekend explorer, preserve your journeys with location tagging, date tracking, and favorite marking features.
