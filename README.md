@@ -118,7 +118,6 @@ npm run dev
 - 🍃 MongoDB (via MongoDB Atlas)
 - 🦋 Mongoose for database modeling
 - 🔑 JWT for authentication
-- 📁 Multer for image uploads
 - 🔒 bcrypt for password hashing
 
 ### Frontend
